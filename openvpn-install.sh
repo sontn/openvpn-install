@@ -239,6 +239,7 @@ LimitNPROC=infinity" > /etc/systemd/system/openvpn-server@server.service.d/disab
 	# Get easy-rsa
 	easy_rsa_url='https://github.com/OpenVPN/easy-rsa/releases/download/v3.2.1/EasyRSA-3.2.1.tgz'
 	mkdir -p /etc/openvpn/server/easy-rsa/
+	mkdir -p /etc/openvpn/ccd
 	{ wget -qO- "$easy_rsa_url" 2>/dev/null || curl -sL "$easy_rsa_url" ; } | tar xz -C /etc/openvpn/server/easy-rsa/ --strip-components 1
 	chown -R root:root /etc/openvpn/server/easy-rsa/
 	cd /etc/openvpn/server/easy-rsa/
@@ -271,6 +272,7 @@ LimitNPROC=infinity" > /etc/systemd/system/openvpn-server@server.service.d/disab
 	echo "local $ip
 port $port
 proto $protocol
+client-config-dir /etc/openvpn/ccd
 dev tun
 ca ca.crt
 cert server.crt
@@ -449,7 +451,7 @@ else
 	case "$option" in
 		1)
 			echo
-			echo "Provide a name for the client:"
+			echo "Provide a name for the client (format: clientname001):"
 			read -p "Name: " unsanitized_client
 			client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
 			while [[ -z "$client" || -e /etc/openvpn/server/easy-rsa/pki/issued/"$client".crt ]]; do
@@ -461,6 +463,12 @@ else
 			./easyrsa --batch --days=3650 build-client-full "$client" nopass
 			# Generates the custom client.ovpn
 			new_client
+
+			# Assign fixed IP based on client name
+			client_ip_suffix=$(echo "$client" | grep -o '[0-9]\+')
+			fixed_ip="10.8.0.$((100 + client_ip_suffix))"  # Assuming clientname001 means 10.8.0.101
+			echo "ifconifg-push $client $fixed_ip" > /etc/openvpn/ccd/"$client"  # Create client config dir entry
+
 			echo
 			echo "$client added. Configuration available in:" ~/"$client.ovpn"
 			exit
