@@ -412,6 +412,8 @@ WantedBy=multi-user.target" >> /etc/systemd/system/openvpn-iptables.service
 	echo "client
 dev tun
 proto $protocol
+ping 10
+ping-restart 60
 remote $ip $port
 resolv-retry infinite
 nobind
