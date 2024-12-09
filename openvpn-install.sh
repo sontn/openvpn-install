@@ -266,7 +266,7 @@ LimitNPROC=infinity" > /etc/systemd/system/openvpn-server@server.service.d/disab
 # ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
 # -----END DH PARAMETERS-----' > /etc/openvpn/server/dh.pem
 	./easyrsa --batch gen-dh
-	mv ./pki/dh.pem ../..
+	mv /etc/openvpn/server/easy-rsa/pki/dh.pem /etc/openvpn/server
 	# Generate server.conf
 	echo "local $ip
 port $port
