@@ -467,7 +467,7 @@ else
 			# Assign fixed IP based on client name
 			client_ip_suffix=$(echo "$client" | grep -o '[0-9]\+')
 			fixed_ip="10.8.0.$((100 + client_ip_suffix))"  # Assuming clientname001 means 10.8.0.101
-			echo "ifconifg-push $client $fixed_ip" > /etc/openvpn/ccd/"$client"  # Create client config dir entry
+			echo "ifconfig-push $fixed_ip 255.255.252.0" > /etc/openvpn/ccd/"$client"  # Create client config dir entry
 
 			echo
 			echo "$client added. Configuration available in:" ~/"$client.ovpn"
