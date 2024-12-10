@@ -451,7 +451,7 @@ else
 	case "$option" in
 		1)
 			echo
-			echo "Provide a name for the client (format: clientname002, start from minimum 2 to maximium 1023):"
+			echo "Provide a name for the client (format: clientname002, start from minimum 2 to maximum 1023):"
 			read -p "Name: " unsanitized_client
 			client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
 			while [[ -z "$client" || -e /etc/openvpn/server/easy-rsa/pki/issued/"$client".crt ]]; do
@@ -459,10 +459,6 @@ else
 				read -p "Name: " unsanitized_client
 				client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
 			done
-			cd /etc/openvpn/server/easy-rsa/
-			./easyrsa --batch --days=3650 build-client-full "$client" nopass
-			# Generates the custom client.ovpn
-			new_client
 
 			# Calculate the client IP suffix ensuring it stays within the valid range
 			client_ip_suffix=$(echo "$client" | grep -o '[0-9]\+')
@@ -474,6 +470,11 @@ else
 			fixed_ip="10.8.$((client_ip_suffix / 256)).$((client_ip_suffix % 256))"  # This will calculate the correct IP
 
 			echo "ifconfig-push $fixed_ip 255.255.252.0" > /etc/openvpn/ccd/"$client"  # Create client config dir entry
+
+			cd /etc/openvpn/server/easy-rsa/
+			./easyrsa --batch --days=3650 build-client-full "$client" nopass
+			# Generates the custom client.ovpn
+			new_client
 
 			echo
 			echo "$client added. Configuration available in:" ~/"$client.ovpn"
