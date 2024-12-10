@@ -451,7 +451,7 @@ else
 	case "$option" in
 		1)
 			echo
-			echo "Provide a name for the client (format: clientname001):"
+			echo "Provide a name for the client (format: clientname002, start from minimum 2 to maximium 1023):"
 			read -p "Name: " unsanitized_client
 			client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
 			while [[ -z "$client" || -e /etc/openvpn/server/easy-rsa/pki/issued/"$client".crt ]]; do
@@ -468,8 +468,8 @@ else
 			client_ip_suffix=$(echo "$client" | grep -o '[0-9]\+')
 			# Ensure the suffix does not exceed 1023 (which corresponds to 10.8.3.254)
 			if (( client_ip_suffix > 1023 )); then
-				echo "Client IP suffix exceeds the valid range. Setting to 1023."
-				client_ip_suffix=1023
+				echo "Error: Client IP suffix exceeds the valid range from 0 to 1023. Exiting."
+				exit 1
 			fi
 			fixed_ip="10.8.$((client_ip_suffix / 256)).$((client_ip_suffix % 256))"  # This will calculate the correct IP
 
