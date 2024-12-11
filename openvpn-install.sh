@@ -460,12 +460,13 @@ else
 			done
 
 			# Calculate the client IP suffix ensuring it stays within the valid range
-			client_ip_suffix=$(echo "$client" | grep -o '[0-9]\+')
+			client_ip_suffix=$(echo "$client" | grep -o '[0-9]\+' | sed 's/^0*//')  # Remove leading zeros
 			# Ensure the suffix does not exceed 1023 (which corresponds to 10.8.3.254)
-			if (( client_ip_suffix > 1023 )); then
+			if [[ -z "$client_ip_suffix" || "$client_ip_suffix" -gt 1023 ]]; then
 				echo "Error: Client IP suffix exceeds the valid range from 0 to 1023. Exiting."
 				exit 1
 			fi
+
 			fixed_ip="10.8.$((client_ip_suffix / 256)).$((client_ip_suffix % 256))"  # This will calculate the correct IP
 
 			echo "ifconfig-push $fixed_ip 255.255.252.0" > /etc/openvpn/ccd/"$client"  # Create client config dir entry
