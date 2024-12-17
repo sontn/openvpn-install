@@ -511,6 +511,7 @@ else
 				rm -f /etc/openvpn/server/crl.pem
 				rm -rf /root/"$client".ovpn
 				cp /etc/openvpn/server/easy-rsa/pki/crl.pem /etc/openvpn/server/crl.pem
+				rm -rf /etc/openvpn/ccd/"$client"
 				# CRL is read with each client connection, when OpenVPN is dropped to nobody
 				chown nobody:"$group_name" /etc/openvpn/server/crl.pem
 				echo
