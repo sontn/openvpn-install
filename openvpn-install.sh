@@ -563,11 +563,15 @@ else
 				rm -f /etc/sysctl.d/99-openvpn-forward.conf
 				if [[ "$os" = "debian" || "$os" = "ubuntu" ]]; then
 					rm -rf /etc/openvpn/server
+					rm -rf /etc/openvpn/ccd
+					rm -rf /root/*.ovpn
 					apt-get remove --purge -y openvpn
 				else
 					# Else, OS must be CentOS or Fedora
 					dnf remove -y openvpn
 					rm -rf /etc/openvpn/server
+					rm -rf /etc/openvpn/ccd
+					rm -rf /root/*.ovpn
 				fi
 				echo
 				echo "OpenVPN removed!"
