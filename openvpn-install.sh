@@ -280,7 +280,6 @@ dh dh.pem
 auth SHA512
 tls-crypt tc.key
 topology subnet
-push "route 10.8.0.0 255.255.255.0"
 server 10.8.0.0 255.255.252.0" > /etc/openvpn/server/server.conf
 	# IPv6
 	# if [[ -z "$ip6" ]]; then
@@ -289,6 +288,7 @@ server 10.8.0.0 255.255.252.0" > /etc/openvpn/server/server.conf
 	# 	echo 'server-ipv6 fddd:1194:1194:1194::/64' >> /etc/openvpn/server/server.conf
 	# 	echo 'push "redirect-gateway def1 ipv6 bypass-dhcp"' >> /etc/openvpn/server/server.conf
 	# fi
+	echo 'push "route 10.8.0.0 255.255.252.0"' >> /etc/openvpn/server/server.conf
 	echo 'ifconfig-pool-persist ipp.txt' >> /etc/openvpn/server/server.conf
 	# DNS
 	case "$dns" in
@@ -381,10 +381,12 @@ Before=network.target
 Type=oneshot
 ExecStart=$iptables_path -t nat -A POSTROUTING -s 10.8.0.0/22 ! -d 10.8.0.0/22 -j SNAT --to $ip
 ExecStart=$iptables_path -I INPUT -p $protocol --dport $port -j ACCEPT
+ExecStart=$iptables_path -I FORWARD -s 10.8.0.0/22 -d 10.8.0.0/22 -j DROP
 ExecStart=$iptables_path -I FORWARD -s 10.8.0.0/22 -j ACCEPT
 ExecStart=$iptables_path -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 ExecStop=$iptables_path -t nat -D POSTROUTING -s 10.8.0.0/22 ! -d 10.8.0.0/22 -j SNAT --to $ip
 ExecStop=$iptables_path -D INPUT -p $protocol --dport $port -j ACCEPT
+ExecStop=$iptables_path -D FORWARD -s 10.8.0.0/22 -d 10.8.0.0/22 -j DROP
 ExecStop=$iptables_path -D FORWARD -s 10.8.0.0/22 -j ACCEPT
 ExecStop=$iptables_path -D FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" > /etc/systemd/system/openvpn-iptables.service
 		if [[ -n "$ip6" ]]; then
